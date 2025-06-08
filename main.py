@@ -31,21 +31,21 @@ def main():
         trend_change = trend_series.pct_change().dropna()
         price_change = price_series.pct_change().dropna()
 
-        # 변화율 시리즈의 인덱스도 동기화(상관계수 계산 전)
+        # 변화율 인덱스 교집합만 추출 (날짜 기준)
         common_index = trend_change.index.intersection(price_change.index)
         trend_change = trend_change.loc[common_index]
         price_change = price_change.loc[common_index]
 
-        # 데이터가 2개 이상일 때만 상관계수 계산
-        if len(trend_change) > 1 and len(price_change) > 1:
+        # ★ 길이 같고 2개 이상일 때만 상관계수 계산
+        if len(trend_change) == len(price_change) and len(trend_change) > 1:
             corr = trend_change.corr(price_change)
-            # 최근 7일 평균 > 그 전 평균 여부 체크 (데이터 7개 이상만 판단)
+            # 최근 7일 평균 비교(데이터 7개 이상일 때)
             if len(trend_series) > 7 and corr > 0.3 and trend_series[-7:].mean() > trend_series[:-7].mean():
                 body.append(f"🔔 [{keyword}] 관련 {code} 추천 (상관계수: {corr:.2f})")
             else:
                 body.append(f"ℹ️ [{keyword}] 관련 {code} 특별 추천 없음 (상관계수: {corr:.2f})")
         else:
-            body.append(f"⚠️ [{keyword}] 관련 데이터 부족 (종목: {code})")
+            body.append(f"⚠️ [{keyword}] 관련 데이터 부족 또는 길이 불일치 (종목: {code})")
 
     # GitHub Actions에서는 환경 변수(Secrets)에서 이메일 계정/비밀번호 받음
     import os
