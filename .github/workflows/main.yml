@@ -1,0 +1,23 @@
+name: Daily Stock Recommend Mail
+
+on:
+  schedule:
+    - cron:  '50 23 * * *'   # 한국 8:50은 UTC 23:50 (서머타임 예외 있음)
+  workflow_dispatch:         # 수동 실행도 지원
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run script
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PW: ${{ secrets.EMAIL_PW }}
+        run: python main.py
